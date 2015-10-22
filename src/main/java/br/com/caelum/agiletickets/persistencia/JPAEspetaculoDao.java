@@ -49,9 +49,9 @@ public class JPAEspetaculoDao implements Agenda {
 	
 	@Override
 	public List<Sessao> proximasSessoes(int maximo) {
-		return manager.createQuery("select s from Sessao s where s.inicio > :hoje order by s.inicio", Sessao.class)
+		return manager.createQuery("select s from Sessao s where s.inicio >= :hoje order by s.inicio", Sessao.class)
 					.setParameter("hoje", relogio.agora())
-					.setMaxResults(maximo)
+					//.setMaxResults(maximo)
 					.getResultList();
 	}
 	

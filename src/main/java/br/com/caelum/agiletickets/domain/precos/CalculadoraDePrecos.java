@@ -8,41 +8,44 @@ import br.com.caelum.agiletickets.models.TipoDeEspetaculo;
 public class CalculadoraDePrecos {
 
 	public static BigDecimal calcula(Sessao sessao, Integer quantidade) {
-		BigDecimal preco;
+		BigDecimal preco = BigDecimal.ZERO;		
+		BigDecimal precoSessao = sessao.getPreco();
 		
-		if(sessao.getEspetaculo().getTipo().equals(TipoDeEspetaculo.CINEMA) || sessao.getEspetaculo().getTipo().equals(TipoDeEspetaculo.SHOW)) {
-			//quando estiver acabando os ingressos... 
-			if((sessao.getTotalIngressos() - sessao.getIngressosReservados()) / sessao.getTotalIngressos().doubleValue() <= 0.05) { 
-				preco = sessao.getPreco().add(sessao.getPreco().multiply(BigDecimal.valueOf(0.10)));
-			} else {
-				preco = sessao.getPreco();
-			}
-		} else if(sessao.getEspetaculo().getTipo().equals(TipoDeEspetaculo.BALLET)) {
-			if((sessao.getTotalIngressos() - sessao.getIngressosReservados()) / sessao.getTotalIngressos().doubleValue() <= 0.50) { 
-				preco = sessao.getPreco().add(sessao.getPreco().multiply(BigDecimal.valueOf(0.20)));
-			} else {
-				preco = sessao.getPreco();
-			}
-			
-			if(sessao.getDuracaoEmMinutos() > 60){
-				preco = preco.add(sessao.getPreco().multiply(BigDecimal.valueOf(0.10)));
-			}
-		} else if(sessao.getEspetaculo().getTipo().equals(TipoDeEspetaculo.ORQUESTRA)) {
-			if((sessao.getTotalIngressos() - sessao.getIngressosReservados()) / sessao.getTotalIngressos().doubleValue() <= 0.50) { 
-				preco = sessao.getPreco().add(sessao.getPreco().multiply(BigDecimal.valueOf(0.20)));
-			} else {
-				preco = sessao.getPreco();
-			}
-
-			if(sessao.getDuracaoEmMinutos() > 60){
-				preco = preco.add(sessao.getPreco().multiply(BigDecimal.valueOf(0.10)));
-			}
-		}  else {
-			//nao aplica aumento para teatro (quem vai é pobretão)
-			preco = sessao.getPreco();
-		} 
+		Integer totalIngressos = sessao.getTotalIngressos();
+		Integer ingressosReservados = sessao.getIngressosReservados();
+		int diffIngressos = totalIngressos - ingressosReservados;
+		
+		Integer duracaoEmMinutos = sessao.getDuracaoEmMinutos();
+		if (duracaoEmMinutos == null) {
+			duracaoEmMinutos = new Integer(0);
+		}
+		
+		double proporcaoIngressos = diffIngressos / totalIngressos.doubleValue();
+		
+		TipoDeEspetaculo tipoEspetaculo = sessao.getEspetaculo().getTipo();
+		double proporcaoMinima = tipoEspetaculo.getProporcaoMinima();
+		double adicionalProporcao = tipoEspetaculo.getAdicionalProporcao();
+		int tempoMaximo = tipoEspetaculo.getTempoMaximo();
+		double adicionalTempo = tipoEspetaculo.getAdicionalTempo();
+		
+		preco = calculaAdicionalPorProporcao(proporcaoIngressos, precoSessao, preco, proporcaoMinima, adicionalProporcao);				
+		preco = preco.add(calculaAdicionalPorTempo(duracaoEmMinutos, precoSessao, tempoMaximo, adicionalTempo));
 
 		return preco.multiply(BigDecimal.valueOf(quantidade));
+	}
+	
+	private static BigDecimal calculaAdicionalPorProporcao(double proporcaoIngressos, BigDecimal precoSessao, BigDecimal preco, double proporcaoMinima, double adicionalProporcao) {
+		if(proporcaoIngressos <= proporcaoMinima) {
+			return precoSessao.add(precoSessao.multiply(BigDecimal.valueOf(adicionalProporcao)));
+		} 
+		return preco = precoSessao;
+	}
+
+	private static BigDecimal calculaAdicionalPorTempo(Integer duracaoEmMinutos, BigDecimal precoSessao, int tempoMaximo, double adicionalTempo) {
+		if(duracaoEmMinutos > tempoMaximo){
+			return precoSessao.multiply(BigDecimal.valueOf(adicionalTempo));
+		}
+		return BigDecimal.ZERO;
 	}
 
 }
