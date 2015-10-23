@@ -11,7 +11,7 @@ import br.com.caelum.agiletickets.acceptance.page.EstabelecimentosPage;
 
 public class EstabelecimentoTest {
 
-	public static String BASE_URL = "http://localhost:8080";
+	public static String BASE_URL = "http://localhost:8585/agiletickets";
 	private static WebDriver browser;
 	private EstabelecimentosPage estabelecimentos;
 

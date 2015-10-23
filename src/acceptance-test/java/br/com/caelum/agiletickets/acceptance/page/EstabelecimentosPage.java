@@ -12,7 +12,7 @@ import org.openqa.selenium.WebElement;
 
 public class EstabelecimentosPage {
 
-	private static final String BASE_URL = "http://localhost:8080";
+	private static final String BASE_URL = "http://localhost:8585/agiletickets";
 	private final WebDriver driver;
 
 	public EstabelecimentosPage(WebDriver driver) {
